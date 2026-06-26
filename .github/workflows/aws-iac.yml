@@ -1,0 +1,40 @@
+name: aws-iac
+---
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '**.tf'
+      - '.github/workflows/aws-iac.yml'
+  pull_request:
+    paths:
+      - '**.tf'
+      - '.github/workflows/aws-iac.yml'
+
+jobs:
+  terraform:
+    runs-on:
+      - self-hosted
+      - linux
+      - us2
+    strategy:
+      matrix:
+        directory: [".", "terraform/aws"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.5
+
+      - name: Terraform format check
+        run: terraform -chdir=${{ matrix.directory }} fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform -chdir=${{ matrix.directory }} init -backend=false
+
+      - name: Terraform validate
+        run: terraform -chdir=${{ matrix.directory }} validate
