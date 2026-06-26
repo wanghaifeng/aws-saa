@@ -1,5 +1,5 @@
 name: aws-iac
----
+
 on:
   push:
     branches: [main, master]
